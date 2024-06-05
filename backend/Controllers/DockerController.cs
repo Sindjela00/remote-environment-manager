@@ -88,7 +88,7 @@ namespace Diplomski.Controllers
             process.StartInfo = processInfo;
             if(process.Start())
                 {
-                  var id = handler.AddProcess(process);
+                  var id = ProcessHandler.AddProcess(process);
                   return Ok(id);
                 }
             return BadRequest($"Error starting build { process.StandardError.ReadToEnd() }");
@@ -130,16 +130,19 @@ namespace Diplomski.Controllers
         [HttpGet("/process/{id}")]
         public IActionResult process_status(ulong id)
         {
-            var process = handler.GetProcess(id);
-            if(!process.process.HasExited)
-            {
+            var process = ProcessHandler.GetProcess(id);
+            if(process == null) {
+                return BadRequest(new { error = "Process not found"});
+            }
+
+            Process proc = process.get_process();
+            if(!proc.HasExited) {
                 return BadRequest(new { error = "Process not finished" });
             }
-            if(process.process.ExitCode == 0)
-            {
-                return Ok(new{status = process.process.ExitCode, stdout = process.process.StandardOutput.ReadToEnd(), error = process.process.StandardError.ReadToEnd() });
+            if(proc.ExitCode == 0) {
+                return Ok(new{status = proc.ExitCode, stdout = proc.StandardOutput.ReadToEnd(), error = proc.StandardError.ReadToEnd() });
             }
-            return BadRequest(new { status = process.process.ExitCode, stdout = process.process.StandardOutput.ReadToEnd(), error = process.process.StandardError.ReadToEnd() });
+            return BadRequest(new { status = proc.ExitCode, stdout = proc.StandardOutput.ReadToEnd(), error = proc.StandardError.ReadToEnd() });
         }
     }
 }
