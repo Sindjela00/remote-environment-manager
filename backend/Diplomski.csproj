@@ -9,7 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-    <PackageReference Include="System.Collections" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resource\files\" />
+    <Folder Include="Resource\distro\" />
+    <Folder Include="Resource\wsl\" />
   </ItemGroup>
 
 </Project>
