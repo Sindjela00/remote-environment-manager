@@ -1,3 +1,3 @@
 ﻿#!/bin/bash
 
-echo "Hello World";
+echo "Hello World" >> /home/dev/materijali/test.txt;

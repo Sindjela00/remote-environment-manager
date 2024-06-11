@@ -144,5 +144,39 @@ namespace Diplomski.Controllers
             }
             return BadRequest(new { status = proc.ExitCode, stdout = proc.StandardOutput.ReadToEnd(), error = proc.StandardError.ReadToEnd() });
         }
+
+        [HttpGet("/containers")]
+        public IActionResult get_containers(bool? running)
+        {
+            var processInfo = new ProcessStartInfo("docker", $"ps" + ((running != true) ? " -a": "") );
+
+            processInfo.CreateNoWindow = true;
+            processInfo.UseShellExecute = false;
+            processInfo.RedirectStandardOutput = true;
+            processInfo.RedirectStandardError = true;
+
+            int exitCode;
+            using(var process = new Process())
+            {
+                process.StartInfo = processInfo;
+                process.Start();
+                process.WaitForExit(30000);
+                if(!process.HasExited)
+                {
+                    process.Kill();
+                }
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+
+                exitCode = process.ExitCode;
+                process.Close();
+                if(exitCode != 0)
+                {
+                    return BadRequest("Cant start container. error=" + error);
+                }
+           
+                return Ok(output);
+            }
+        }
     }
 }
