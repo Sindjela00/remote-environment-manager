@@ -49,5 +49,37 @@ namespace Diplomski.Controllers
             }
             return BadRequest("Error renaming room!");
         }
+
+        [HttpGet("machines")]
+        public IActionResult list_machines(){
+            List<Machine>? machines = DB.ListMachines();
+            if(machines == null){
+                return BadRequest("Error retriving machines");
+            }
+            return Ok(machines);
+        }
+
+        [HttpGet("machines/{id}")]
+        public IActionResult list_machines(int id){
+            List<Machine>? machines = DB.ListMachines(id);
+            if(machines == null){
+                return BadRequest("Error retriving machines");
+            }
+            return Ok(machines);
+        }
+        [HttpPost("machines")]
+        public IActionResult add_machine(Machine machine){
+            if(DB.AddMachines(machine)){
+                return BadRequest("Error adding machine");
+            }
+            return Ok();
+        }
+        [HttpPut("machines/{id}")]
+        public IActionResult edit_machine(int id, Machine machine){
+            if(DB.EditMachines(id, machine)){
+                return BadRequest("Error adding machine");
+            }
+            return Ok();
+        }
     }
 }
