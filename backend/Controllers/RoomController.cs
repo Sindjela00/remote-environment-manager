@@ -10,6 +10,23 @@ namespace Diplomski.Controllers
     [Route("[controller]")]
     public class RoomController : Controller
     {
+
+        private static string write_inventory(List<Machine> machines){
+            string filename = Path.GetRandomFileName();
+            string path = @"./Resource/inventory/" + filename;
+            StreamWriter sw = new StreamWriter(path);
+            int current_room = 0;
+            foreach(Machine machine in machines){
+                if(current_room != machine.roomId) {
+                    current_room = machine.roomId;
+                    sw.WriteLine("[room" + current_room + "]");
+                }
+                sw.WriteLine(machine.hostname);
+            }
+            sw.Close();
+            return filename;
+        }
+
         [HttpGet]
         public IActionResult get_rooms()
         {
@@ -80,6 +97,43 @@ namespace Diplomski.Controllers
                 return BadRequest("Error adding machine");
             }
             return Ok();
+        }
+        [HttpPost("inventory")]
+        public IActionResult generate_inventory(List<int> ids){
+            List<Machine>? machines = DB.ListMachines(ids);
+            if(machines == null){
+                return BadRequest("Error finding machines");
+            }
+            if(machines.Count != ids.Count){
+                return BadRequest("Not all machines found");
+            }
+            machines.OrderBy(x=>x.roomId);
+
+            string filename = write_inventory(machines);
+
+            return Ok(filename);
+        }
+        [HttpPost("room_inventory")]
+        public IActionResult generate_room_inventory(List<int> ids){
+            List<Machine>? machines = new List<Machine>();
+            foreach(int id in ids){
+                List<Machine>? mac = DB.ListMachines(id);
+                if (mac == null) {
+                    continue;
+                }   
+                machines.AddRange(mac);
+            }
+            if(machines == null){
+                return BadRequest("Error finding machines");
+            }
+            if(machines.Count != ids.Count){
+                return BadRequest("Not all machines found");
+            }
+            machines.OrderBy(x=>x.roomId);
+
+            string filename = write_inventory(machines);
+
+            return Ok(filename);
         }
     }
 }

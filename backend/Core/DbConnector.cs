@@ -150,6 +150,52 @@ public class DB
         }
         return list;
     }
+    public static List<Machine>? ListMachines(List<int> ids)
+    {
+        List<Machine> list = new List<Machine>();
+        using (var connection = new MySqlConnection(connStr))
+        {
+            try
+            {
+                string ids_params = "";
+                int brojac = 0;
+                foreach (var id in ids)
+                {
+                    ids_params += "@id"+ brojac.ToString() + " ,";
+                    brojac++;
+                }
+                string sql = "select * from machines where id IN (" + ids_params.Substring(0,  ids_params.Length - 1) +")";
+                connection.Open();
+                MySqlCommand command = new MySqlCommand(sql, connection);
+                brojac = 0;
+                foreach (var id in ids)
+                {
+                    ids_params = "@id"+ brojac.ToString();
+                    command.Parameters.AddWithValue(ids_params, id);
+                    brojac++;
+                }
+                MySqlDataReader data_reader = command.ExecuteReader(System.Data.CommandBehavior.Default);
+                while (data_reader.Read())
+                {
+                    int id = data_reader.GetInt32(0);
+                    string name = data_reader.GetString(1);
+                    string hostname = data_reader.GetString(2);
+                    string ipv4 = data_reader.GetString(3);
+                    string ipv6 = data_reader.GetString(4);
+                    int posx = data_reader.GetInt32(5);
+                    int posy = data_reader.GetInt32(6);
+                    int roomId = data_reader.GetInt32(7);
+                    list.Add(new Machine(id, name, hostname, ipv4, ipv6, posx, posy, roomId));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
+        }
+        return list;
+    }
     public static bool AddMachines(Machine machine)
     {
         using (var connection = new MySqlConnection(connStr))

@@ -43,9 +43,6 @@ namespace Diplomski.Controllers
                 }
                 return BadRequest(exitCode);
             }
-
-
-            return Ok();
         }
         [HttpPost("/push")]
         public IActionResult push(List<IFormFile> files)
