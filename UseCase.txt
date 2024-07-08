@@ -1,0 +1,21 @@
+Racunari/masine imaju sledece atribute
+public int id
+public string name
+public string hostname
+public string ipv4
+public string ipv6
+public int posx // Pozicija u sobi
+public int posy 
+public int roomId
+
+Racunari su podeljeni po sobama.
+
+API
+/Room/inventory - kreira ansible inventory file za listu prosledjenih racunara 
+/Room/room_inventory - kreira ansible inventory za tu sobu
+
+Oba ova Api vracaju ime kreiranog inventory fajla.
+Ime inventorija proslediti funkciji koju zelis da iskoristis(start container, push/pull files)
+
+Backend pokrece ansible proces koji ce da iskoristi taj inventori fajl i vratice id tog procesa.
+Na API /process/{id}  mozemo da proverimo stanje procesa.

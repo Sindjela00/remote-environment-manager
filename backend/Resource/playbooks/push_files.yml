@@ -1,0 +1,11 @@
+---
+
+- name: Build Docker Image
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Copy materijali
+      copy:
+        src: "{{ playbook_dir }}/../files/{{ source }}/"
+        dest: /home/machine/materijali/

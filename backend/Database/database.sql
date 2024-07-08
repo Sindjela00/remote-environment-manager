@@ -30,6 +30,7 @@ CREATE TABLE `machines` (
   `hostname` varchar(50) DEFAULT NULL,
   `ipv4` varchar(50) DEFAULT NULL,
   `ipv6` varchar(50) DEFAULT NULL,
+  `port` int DEFAULT '0',
   `posx` int DEFAULT '-1',
   `posy` int DEFAULT '-1',
   `roomId` int NOT NULL DEFAULT '-1',

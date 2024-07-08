@@ -1,0 +1,19 @@
+---
+
+- name: Build Docker Image
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: find files to copy
+      find: 
+        paths: "/home/machine/rad"
+        recurse: yes
+      register: files_to_copy
+
+    - name: Fetch radovi
+      fetch:
+        src: "{{ item.path }}"
+        dest: "{{ playbook_dir }}/../files/pull/{{ ansible_facts['ip'] }}/"
+        flat: yes
+      with_items: "{{ files_to_copy.files }}"

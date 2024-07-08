@@ -21,7 +21,12 @@ namespace Diplomski.Controllers
                     current_room = machine.roomId;
                     sw.WriteLine("[room" + current_room + "]");
                 }
-                sw.WriteLine(machine.hostname);
+                if(machine.port != 0){
+                    sw.WriteLine($"{machine.hostname}:{machine.port}");
+                }
+                else {
+                    sw.WriteLine($"{machine.hostname}");
+                }
             }
             sw.Close();
             return filename;
@@ -87,16 +92,16 @@ namespace Diplomski.Controllers
         [HttpPost("machines")]
         public IActionResult add_machine(Machine machine){
             if(DB.AddMachines(machine)){
-                return BadRequest("Error adding machine");
+                return Ok();
             }
-            return Ok();
+            return BadRequest("Error adding machine");
         }
         [HttpPut("machines/{id}")]
         public IActionResult edit_machine(int id, Machine machine){
             if(DB.EditMachines(id, machine)){
-                return BadRequest("Error adding machine");
+                return Ok();
             }
-            return Ok();
+            return BadRequest("Error adding machine");
         }
         [HttpPost("inventory")]
         public IActionResult generate_inventory(List<int> ids){
@@ -125,9 +130,6 @@ namespace Diplomski.Controllers
             }
             if(machines == null){
                 return BadRequest("Error finding machines");
-            }
-            if(machines.Count != ids.Count){
-                return BadRequest("Not all machines found");
             }
             machines.OrderBy(x=>x.roomId);
 

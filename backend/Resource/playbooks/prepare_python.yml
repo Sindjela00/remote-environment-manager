@@ -1,0 +1,17 @@
+---
+
+- name: Build Docker Image
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Apt update
+      shell: apt update
+
+    - name: Install dep
+      shell: apt install -y python3 python3-pip docker docker.io
+
+    - name: Make workdirs
+      shell: |
+        mkdir materijali
+        mkdir rad

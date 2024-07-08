@@ -1,11 +1,13 @@
 public class Machine{
-    public Machine(int id, string name, string hostname, string ipv4, string ipv6, int posx, int posy, int roomId)
+    public Machine() {}
+    public Machine(int id, string name, string hostname, string ipv4, string ipv6, int port, int posx, int posy, int roomId)
     {
         this.id = id;
         this.name = name;
         this.hostname = hostname;
         this.ipv4 = ipv4;
         this.ipv6 = ipv6;
+        this.port = port;
         this.posx = posx;
         this.posy = posy;
         this.roomId = roomId;
@@ -16,6 +18,7 @@ public class Machine{
     public string hostname { get; set; }
     public string ipv4 { get; set; }
     public string ipv6 { get; set; }
+    public int port {get; set; }
     public int posx { get; set; }
     public int posy { get; set; } 
     public int roomId { get; set; }

@@ -104,10 +104,11 @@ public class DB
                     string hostname = data_reader.GetString(2);
                     string ipv4 = data_reader.GetString(3);
                     string ipv6 = data_reader.GetString(4);
-                    int posx = data_reader.GetInt32(5);
-                    int posy = data_reader.GetInt32(6);
-                    int roomId = data_reader.GetInt32(7);
-                    list.Add(new Machine(id, name, hostname, ipv4, ipv6, posx, posy, roomId));
+                    int port = data_reader.GetInt32(5);
+                    int posx = data_reader.GetInt32(6);
+                    int posy = data_reader.GetInt32(7);
+                    int roomId = data_reader.GetInt32(8);
+                    list.Add(new Machine(id, name, hostname, ipv4, ipv6, port, posx, posy, roomId));
                 }
             }
             catch (Exception ex)
@@ -137,9 +138,10 @@ public class DB
                     string hostname = data_reader.GetString(2);
                     string ipv4 = data_reader.GetString(3);
                     string ipv6 = data_reader.GetString(4);
-                    int posx = data_reader.GetInt32(5);
-                    int posy = data_reader.GetInt32(6);
-                    list.Add(new Machine(id, name, hostname, ipv4, ipv6, posx, posy, roomId));
+                    int port = data_reader.GetInt32(5);
+                    int posx = data_reader.GetInt32(6);
+                    int posy = data_reader.GetInt32(7);
+                    list.Add(new Machine(id, name, hostname, ipv4, ipv6, port, posx, posy, roomId));
                 }
             }
             catch (Exception ex)
@@ -182,10 +184,11 @@ public class DB
                     string hostname = data_reader.GetString(2);
                     string ipv4 = data_reader.GetString(3);
                     string ipv6 = data_reader.GetString(4);
-                    int posx = data_reader.GetInt32(5);
-                    int posy = data_reader.GetInt32(6);
-                    int roomId = data_reader.GetInt32(7);
-                    list.Add(new Machine(id, name, hostname, ipv4, ipv6, posx, posy, roomId));
+                    int port = data_reader.GetInt32(5);
+                    int posx = data_reader.GetInt32(6);
+                    int posy = data_reader.GetInt32(7);
+                    int roomId = data_reader.GetInt32(8);
+                    list.Add(new Machine(id, name, hostname, ipv4, ipv6, port, posx, posy, roomId));
                 }
             }
             catch (Exception ex)
@@ -203,13 +206,14 @@ public class DB
             try
             {
                 connection.Open();
-                string sql = "INSERT INTO machines(name, hostname, ipv4, ipv6, posx, posy, roomid) VALUES (@name, @hostname, @ipv4, @ipv6, @posx, @posy, @roomid)";
+                string sql = "INSERT INTO machines(name, hostname, ipv4, ipv6, port, posx, posy, roomid) VALUES (@name, @hostname, @ipv4, @ipv6, @port, @posx, @posy, @roomid)";
 
                 MySqlCommand command = new MySqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@name", machine.name);
                 command.Parameters.AddWithValue("@hostname", machine.hostname);
                 command.Parameters.AddWithValue("@ipv4", machine.ipv4);
                 command.Parameters.AddWithValue("@ipv6", machine.ipv6);
+                command.Parameters.AddWithValue("@port", machine.port);
                 command.Parameters.AddWithValue("@posx", machine.posx);
                 command.Parameters.AddWithValue("@posy", machine.posy);
                 command.Parameters.AddWithValue("@roomid", machine.roomId);
@@ -235,13 +239,14 @@ public class DB
             try
             {
                 connection.Open();
-                string sql = "UPDATE machines SET name = @name , hostname = @hostname, ipv4 = @ipv4, ipv6 = @ipv6, posx = @posx, posy = @posy, roomid = @roomid WHERE id = @id";
+                string sql = "UPDATE machines SET name = @name , hostname = @hostname, ipv4 = @ipv4, ipv6 = @ipv6, port = @port, posx = @posx, posy = @posy, roomid = @roomid WHERE id = @id";
 
                 MySqlCommand command = new MySqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@name", machine.name);
                 command.Parameters.AddWithValue("@hostname", machine.hostname);
                 command.Parameters.AddWithValue("@ipv4", machine.ipv4);
                 command.Parameters.AddWithValue("@ipv6", machine.ipv6);
+                command.Parameters.AddWithValue("@port", machine.port);
                 command.Parameters.AddWithValue("@posx", machine.posx);
                 command.Parameters.AddWithValue("@posy", machine.posy);
                 command.Parameters.AddWithValue("@roomid", machine.roomId);

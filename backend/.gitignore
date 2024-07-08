@@ -400,3 +400,4 @@ FodyWeavers.xsd
 # Resource directory
 Resource/files/
 Resource/wsl/
+Resource/inventory/

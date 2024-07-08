@@ -1,0 +1,22 @@
+---
+
+- name: Build Docker Image
+  hosts: all
+  become: yes
+  tasks:
+
+    - name: Copy Dockerimage
+      copy:
+        src: "{{ playbook_dir }}/../Dockerimages/uvi"
+        dest: /home/machine/uvi
+
+    - name: Build Docker image
+      docker_image:
+        name: "uvi"
+        build: 
+          path: .
+        dockerfile: /home/machine/uvi
+        state: present
+
+    - name: Delete dockerfile
+      shell: "rm {{ playbook_dir }}/../Dockerimages/uvi"

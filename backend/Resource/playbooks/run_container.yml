@@ -1,0 +1,8 @@
+---
+
+- name: Build Docker Image
+  hosts: all
+  become: yes
+  tasks:
+    - name: Start a container with a command
+      shell: docker run -dt --name {{ name }} -v /home/machine/materijali:/materijali -v /home/machine/rad:/rad {{ name }}:latest /bin/bash
