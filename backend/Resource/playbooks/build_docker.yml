@@ -7,16 +7,16 @@
 
     - name: Copy Dockerimage
       copy:
-        src: "{{ playbook_dir }}/../Dockerimages/uvi"
-        dest: /home/machine/uvi
+        src: "{{ playbook_dir }}/../Dockerimages/{{ dockerimage }}"
+        dest: /home/machine/{{ dockerimage }}
 
     - name: Build Docker image
       docker_image:
-        name: "uvi"
+        name: "{{ dockerimage }}"
         build: 
           path: .
-        dockerfile: /home/machine/uvi
+        dockerfile: "/home/machine/{{ dockerimage }}"
         state: present
 
     - name: Delete dockerfile
-      shell: "rm {{ playbook_dir }}/../Dockerimages/uvi"
+      shell: "rm {{ playbook_dir }}/../Dockerimages/{{ dockerimage }}"
