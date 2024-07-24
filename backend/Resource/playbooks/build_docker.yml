@@ -19,4 +19,4 @@
         state: present
 
     - name: Delete dockerfile
-      shell: "rm {{ playbook_dir }}/../Dockerimages/{{ dockerimage }}"
+      shell: "rm /home/machine/{{ dockerimage }}"
