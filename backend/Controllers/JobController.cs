@@ -7,7 +7,7 @@ namespace Diplomski.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class JobController : Controller
+   public class JobController : Controller
     {
         [HttpPost("/execute")]
         public IActionResult execute(string file, string container) {
@@ -48,24 +48,21 @@ namespace Diplomski.Controllers
         public IActionResult push(List<IFormFile> files)
         {
             long size = files.Sum(f => f.Length);
-            var filePath = "./Resource/files/" + Path.GetRandomFileName();
+            string foldername = Path.GetRandomFileName();
+            var filePath = "./Resource/files/" + foldername;
             System.IO.Directory.CreateDirectory(filePath);
             filePath += "/";
             foreach(var formFile in files)
             {
                 if(formFile.Length > 0)
                 {
-                    using(var stream = System.IO.File.Create(filePath + formFile.FileName))
+                    using(var stream = System.IO.File.Create(path: filePath + formFile.FileName))
                     {
                         formFile.CopyTo(stream);
                     }
                 }
             }
-            DirectoryInfo di = new DirectoryInfo(filePath);
-            foreach(var file in di.GetFiles()){
-                file.MoveTo("C:/Users/Sindjela/Desktop/docker/materijali/" + file.Name);
-            }
-            return Ok(new { count = files.Count, size });
+            return Ok(new { count = files.Count, size, foldername});
         }
         [HttpGet("/pull")]
         public IActionResult Pull()
