@@ -1,6 +1,8 @@
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text;
 using MySql.Data.MySqlClient;
 
 
@@ -264,6 +266,57 @@ public class DB
                 Console.WriteLine(ex.ToString());
                 return false;
             }
+        }
+    }
+
+    public static bool register(string email, string password) {
+        using (var connection = new MySqlConnection(connStr))
+        {
+            try
+            {
+                connection.Open();
+                string sql = "INSERT INTO users(email, password) VALUES (@email, @password)";
+
+                MySqlCommand command = new MySqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@email", email);
+                command.Parameters.AddWithValue("@password", Encoding.UTF8.GetString(SHA256.HashData(Encoding.ASCII.GetBytes(password))));
+
+                int rows_effected = command.ExecuteNonQuery();
+                if (rows_effected > 0)
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return false;
+        }
+    }
+    public static int login(string email, string password) {
+        using (var connection = new MySqlConnection(connStr))
+        {
+            try
+            {
+                connection.Open();
+                string sql = "SELECT * FROM users WHERE email = @email AND password = @password";
+
+                MySqlCommand command = new MySqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@email", email);
+                command.Parameters.AddWithValue("@password", Encoding.UTF8.GetString(SHA256.HashData(Encoding.ASCII.GetBytes(password))));
+
+                var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return reader.GetInt32("id");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return -1;
         }
     }
 }
