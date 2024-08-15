@@ -19,6 +19,7 @@ namespace Diplomski.Controllers
         {
             _config = config;
         }
+        
         [Authorize]
         [HttpGet("sessions")]
         public IActionResult Get()
