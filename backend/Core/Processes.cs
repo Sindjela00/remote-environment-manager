@@ -31,8 +31,8 @@ public class process_t
     }
     public void parse_output()
     {
-        stdout = this.process.StandardOutput.ReadToEnd();
-        stderr = this.process.StandardError.ReadToEnd();
+        stdout += this.process.StandardOutput.ReadToEnd();
+        stderr += this.process.StandardError.ReadToEnd();
         exitCode = this.process.ExitCode;
         switch (exitCode){
             case 0:

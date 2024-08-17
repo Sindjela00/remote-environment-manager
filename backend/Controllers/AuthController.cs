@@ -22,11 +22,9 @@ namespace Diplomski.Controllers
         
         [Authorize]
         [HttpGet("sessions")]
-        public IActionResult Get()
+        public IActionResult get_session()
         {
-            var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-            var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            string user = jwt.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            string user = Globals.get_user(Request);
             List<string> session_names = new List<string>();
             foreach (Session session in Globals.sessions.FindAll(x => x.belong(user)))
             {
@@ -38,9 +36,7 @@ namespace Diplomski.Controllers
         [HttpPost("session")]
         public IActionResult create_session(string name)
         {
-            var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-            var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            string user = jwt.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            string user = Globals.get_user(Request);
             if (Globals.sessions.FindAll(x => x.get_id() == name).Count() != 0)
             {
                 return BadRequest("Name already exists");

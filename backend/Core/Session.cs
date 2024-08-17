@@ -7,6 +7,7 @@ public class Session
     private List<string> user_ids;
     private Processes handler;
     private string inventory;
+    private List<Machine> machines;
     private List<KeyValuePair<string, string>> subset_inventories;
     public Session(string id , string user_id)
     {
@@ -22,6 +23,9 @@ public class Session
         }
         return false;
     }
+    public bool owner(string user_id){
+       return user_id == owner_id; 
+    }
     public void add_permission(string user_id) {
         user_ids.Add(user_id);
     }
@@ -35,9 +39,13 @@ public class Session
     {
         handler.add_process(process);
     }
-    public void set_inventory(string inventory)
+    public void set_inventory(string inventory, List<Machine> machines)
     {
         this.inventory = inventory;
+        this.machines = machines;
+    }
+    public List<Machine> get_machines() {
+        return machines;
     }
     public void add_subset_inventory(string name, string subset_inventories)
     {
@@ -49,7 +57,11 @@ public class Session
     }
     public string get_inventory(string name)
     {
-        return this.subset_inventories.Find(x => x.Key == name).Value;
+        KeyValuePair<string, string> key_pair = subset_inventories.Find(x => x.Key == name);
+        if (key_pair.Equals(null)) {
+            return "";
+        }
+        return key_pair.Value;
     }
     public dynamic jobs_result(){
         return handler.parse_processes();

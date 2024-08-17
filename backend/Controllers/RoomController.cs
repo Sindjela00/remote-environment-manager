@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.Common;
 using System.Diagnostics;
@@ -10,38 +11,6 @@ namespace Diplomski.Controllers
     [Route("[controller]")]
     public class RoomController : Controller
     {
-
-        private static string? write_inventory(List<Machine> machines){
-            string filename = Path.GetRandomFileName();
-            string path = @"./Resource/inventory/" + filename;
-            StreamWriter sw = new StreamWriter(path);
-            int current_room = 0;
-            
-            List<Room>? rooms = DB.ListRooms();
-            if (rooms == null || rooms.Count == 0) {
-                return null;
-            }
-            foreach(Machine machine in machines){
-                if(current_room != machine.roomId) {
-                    current_room = machine.roomId;
-                    Room? room = rooms.Find(x => x.id == current_room);
-                    if(room != null) {
-                        sw.WriteLine("[" + room.name + "]");
-                    }
-                }
-                if(machine.port != 0){
-                    sw.WriteLine(value: $"{machine.hostname} ansible_ssh_host={machine.ipv4} ansible_ssh_port={machine.port} ansible_ssh_pass=machine ansible_ssh_user=machine ansible_sudo_pass=machine");
-                    //sw.WriteLine($"{machine.hostname}:{machine.port}");
-                }
-                else {
-                    sw.WriteLine(value: $"{machine.hostname} ansible_ssh_host={machine.ipv4} ansible_ssh_pass=machine ansible_ssh_user=machine ansible_sudo_pass=machine");
-                    //sw.WriteLine($"{machine.hostname}");
-                }
-            }
-            sw.Close();
-            return filename;
-        }
-
         [HttpGet]
         public IActionResult get_rooms()
         {
@@ -113,8 +82,15 @@ namespace Diplomski.Controllers
             }
             return BadRequest("Error adding machine");
         }
+        [Authorize]
         [HttpPost("inventory")]
-        public IActionResult generate_inventory(List<int> ids){
+        public IActionResult generate_inventory(string session, List<int> ids){
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
             List<Machine>? machines = DB.ListMachines(ids);
             if(machines == null){
                 return BadRequest("Error finding machines");
@@ -124,12 +100,19 @@ namespace Diplomski.Controllers
             }
             machines.OrderBy(x=>x.roomId);
 
-            string filename = write_inventory(machines);
-
+            string filename = Globals.write_inventory(machines);
+            ses.set_inventory(filename, machines);
             return Ok(filename);
         }
+        [Authorize]
         [HttpPost("room_inventory")]
-        public IActionResult generate_room_inventory(List<int> ids){
+        public IActionResult generate_room_inventory(string session, List<int> ids){
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
             List<Machine>? machines = new List<Machine>();
             foreach(int id in ids){
                 List<Machine>? mac = DB.ListMachines(id);
@@ -143,8 +126,8 @@ namespace Diplomski.Controllers
             }
             machines.OrderBy(x=>x.roomId);
 
-            string filename = write_inventory(machines);
-
+            string filename = Globals.write_inventory(machines);
+            ses.set_inventory(filename, machines);
             return Ok(filename);
         }
     }

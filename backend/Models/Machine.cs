@@ -1,5 +1,15 @@
 public class Machine{
-    public Machine() {}
+    public Machine() {
+        this.id = 0;
+        this.name = "";
+        this.hostname = "";
+        this.ipv4 = "";
+        this.ipv6 = "";
+        this.port = 0;
+        this.posx = 0;
+        this.posy = 0;
+        this.roomId = 0;
+    }
     public Machine(int id, string name, string hostname, string ipv4, string ipv6, int port, int posx, int posy, int roomId)
     {
         this.id = id;
