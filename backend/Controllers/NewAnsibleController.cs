@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Microsoft.VisualBasic;
 using Org.BouncyCastle.Crypto.Digests;
+using Org.BouncyCastle.Ocsp;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -13,51 +14,45 @@ namespace Diplomski.Controllers
     [Route("[controller]")]
     public class NewAnsibleController : Controller
     {
-        static ProcessHandler handler;
-
-        public NewAnsibleController()
-        {
-            if (handler == null)
-            {
-                handler = new ProcessHandler();
-            }
-        }
-        
         [Authorize]
         [HttpPost("/build1")]
         public IActionResult build_image(string session, string predmet, string image, string? inventory, List<int>? machines)
         {
-            string user = get_user();
+            string user = Globals.get_user(Request);
             Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
             if (ses == null)
             {
                 return BadRequest("You dont have permission for that session!");
             }
-            string inv = choose_inventory(user, ses!, inventory, machines);
-
-            return build_image_func(ses, predmet, image, inv);
+            string inv = Globals.choose_inventory( ses!, inventory, machines);
+            if (Ansible.build_image_func(ses, predmet, image, inv)) {
+                return Ok();
+            }
+            return BadRequest();
         }
 
         
         [HttpPost("/start1")]
         public IActionResult start_image(string session, string predmet, string image, string? inventory, List<int>? machines)
         {
-            string user = get_user();
+            string user = Globals.get_user(Request);
             Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
             if (ses == null)
             {
                 return BadRequest("You dont have permission for that session!");
             }
-            string inv = choose_inventory(user, ses!, inventory, machines);
-
-            return start_image_func(ses, predmet, image, inv);
+            string inv = Globals.choose_inventory( ses!, inventory, machines);
+             if (Ansible.start_image_func(ses, predmet, image, inv)) {
+                return Ok();
+            }
+            return BadRequest();
         }
 
 
         [HttpGet("/ansibele_process")]
         public IActionResult ansible_process_status(string session)
         {
-            string user = get_user();
+            string user = Globals.get_user(Request);
             Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
             if (ses == null)
             {
@@ -124,141 +119,36 @@ namespace Diplomski.Controllers
         [HttpPost("/push_files1")]
         public IActionResult push_files(string session, string directory, string? inventory, List<int>? machines)
         {
-            string user = get_user();
+            string user = Globals.get_user(Request);
             Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
             if (ses == null)
             {
                 return BadRequest("You dont have permission for that session!");
             }
-            string inv = choose_inventory(user, ses, inventory, machines);
-            return push_files_func(ses, directory,inv);
+            string inv = Globals.choose_inventory( ses!, inventory, machines);
+            if (Ansible.push_files_func(ses, directory,inv)) {
+                return Ok();
+            }
+            return BadRequest();
         }
 
         [HttpPost("/pull_files1")]
         public IActionResult pull_files(string session, string? inventory, List<int>? machines)
         {
-            string user = get_user();
+            string user = Globals.get_user(Request);
             Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
             if (ses == null)
             {
                 return BadRequest("You dont have permission for that session!");
             }
-            string inv = choose_inventory(user, ses!, inventory, machines);
-            return pull_files_func(ses, inv);
-        }
-        private IActionResult pull_files_func(Session session, string inventory)
-        {
-            var processInfo = new ProcessStartInfo("bash",
-                $"-c \"ansible-playbook -i Resource/inventory/{inventory} Resource/playbooks/pull_files.yml\"");
-            processInfo.CreateNoWindow = true;
-            processInfo.UseShellExecute = false;
-            processInfo.RedirectStandardOutput = true;
-            processInfo.RedirectStandardError = true;
-
-            var process = new Process();
-
-            process.StartInfo = processInfo;
-            if (process.Start())
-            {
-                session.addProcess(process);
+            string inv = Globals.choose_inventory( ses!, inventory, machines);
+            if (Ansible.pull_files_func(ses, inv)) {
                 return Ok();
             }
-            return BadRequest($"Error starting build {process.StandardError.ReadToEnd()}");
-        }
-        private IActionResult build_image_func(Session session, string predmet, string image, string inventory)
-        {
-            var files = Directory.GetFiles(@"./Resource/Dockerimages");
-
-            for (int i = 0; i < files.Length; i++)
-            {
-                files[i] = Path.GetFileName(files[i]);
-            }
-            string file = files.ToList().Find(files => files.Contains(image));
-            if (file == null)
-            {
-                return BadRequest("Image not found");
-            }
-            var processInfo = new ProcessStartInfo("bash",
-                $"-c \"ansible-playbook -i Resource/inventory/{inventory} --extra-vars \'name={predmet} dockerimage={image}\' Resource/playbooks/build_docker.yml \"");
-            processInfo.CreateNoWindow = true;
-            processInfo.UseShellExecute = false;
-            processInfo.RedirectStandardOutput = true;
-            processInfo.RedirectStandardError = true;
-
-            var process = new Process();
-
-            process.StartInfo = processInfo;
-            if (process.Start())
-            {
-                session.addProcess(process);
-                return Ok();
-            }
-            return BadRequest($"Error starting build {process.StandardError.ReadToEnd()}");
+            return BadRequest();
         }
         
+        
 
-        private string choose_inventory(string id, Session session, string? inventory, List<int>? machines)
-        {
-            if (machines != null && machines.Count > 0)
-            {
-                return Globals.write_inventory(DB.ListMachines(machines));
-            }
-
-            if (inventory != null)
-            {
-                return session.get_inventory(inventory);
-            }
-            return session.get_inventory();
-        }
-
-        private bool has_access(string id, string session)
-        {
-            return Globals.sessions.Find(x => x.get_id() == session && x.owner(id)) != null;
-        }
-
-        private string get_user()
-        {
-            var token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-            var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            return jwt.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
-        }
-        private IActionResult start_image_func(Session session, string predmet, string image, string inventory)
-        {
-            ProcessStartInfo processInfo = new ProcessStartInfo("bash",
-                $"-c \"ansible-playbook -i Resource/inventory/{inventory} --extra-vars \'name={predmet} dockerimage={image}\' Resource/playbooks/run_container.yml \"");
-            processInfo.CreateNoWindow = true;
-            processInfo.UseShellExecute = false;
-            processInfo.RedirectStandardOutput = true;
-            processInfo.RedirectStandardError = true;
-
-            Process? process = new Process();
-
-            process.StartInfo = processInfo;
-            if (process.Start())
-            {
-                session.addProcess(process);
-                return Ok();
-            }
-            return BadRequest($"Error starting build {process.StandardError.ReadToEnd()}");
-        }
-        private IActionResult push_files_func(Session session, string directory, string inventory)
-        {
-            var processInfo = new ProcessStartInfo("bash",
-                $"-c \"ansible-playbook -i Resource/inventory/{inventory} --extra-vars \'source={directory}\' Resource/playbooks/push_files.yml \"");
-            processInfo.CreateNoWindow = true;
-            processInfo.UseShellExecute = false;
-            processInfo.RedirectStandardOutput = true;
-            processInfo.RedirectStandardError = true;
-
-            var process = new Process();
-
-            process.StartInfo = processInfo;
-            if (process.Start())
-            {
-                session.addProcess(process);
-                return Ok();
-            }
-            return BadRequest($"Error starting build {process.StandardError.ReadToEnd()}");
-        }
     }
 }

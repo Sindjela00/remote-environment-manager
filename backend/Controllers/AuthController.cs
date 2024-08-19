@@ -44,6 +44,20 @@ namespace Diplomski.Controllers
             Globals.sessions.Add(new Session(name,  user));
             return Ok();
         }
+        [Authorize]
+        [HttpPut("session")]
+        public IActionResult addto_session(string session, string email)
+        {
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.owner(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            int userid = DB.userid_by_email(email);
+            ses.add_permission(userid.ToString());
+            return Ok();
+        }
 
         [HttpPost("register")]
         public IActionResult register(string email, string password)

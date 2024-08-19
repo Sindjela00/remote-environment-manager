@@ -47,4 +47,17 @@ public static class Globals {
             sw.Close();
             return filename;
         }
+        public static string choose_inventory(Session session, string? inventory, List<int>? machines)
+        {
+            if (machines != null && machines.Count > 0)
+            {
+                return Globals.write_inventory(DB.ListMachines(machines));
+            }
+
+            if (inventory != null)
+            {
+                return session.get_inventory(inventory);
+            }
+            return session.get_inventory();
+        }
 }

@@ -105,6 +105,52 @@ namespace Diplomski.Controllers
             return Ok(filename);
         }
         [Authorize]
+        [HttpPut("inventory")]
+        public IActionResult addto_inventory(string session, List<int> ids){
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            List<Machine>? machines = DB.ListMachines(ids);
+            if(machines == null){
+                return BadRequest("Error finding machines");
+            }
+            if(machines.Count != ids.Count){
+                return BadRequest("Not all machines found");
+            }
+            machines.AddRange(ses.get_machines());
+            machines.OrderBy(x=>x.roomId);
+
+            string filename = Globals.write_inventory(machines);
+            ses.set_inventory(filename, machines);
+            return Ok(filename);
+        }
+        [Authorize]
+        [HttpDelete("inventory")]
+        public IActionResult removefrom_inventory(string session, List<int> ids){
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            List<Machine> machines = ses.get_machines();
+  
+            if(machines.Count != ids.Count){
+                return BadRequest("No more machines");
+            }
+            foreach(int id in ids) {
+                machines.RemoveAll(x=>x.id == id);
+            }
+            machines.OrderBy(x=>x.roomId);
+
+            string filename = Globals.write_inventory(machines);
+            ses.set_inventory(filename, machines);
+            return Ok(filename);
+        }
+        [Authorize]
         [HttpPost("room_inventory")]
         public IActionResult generate_room_inventory(string session, List<int> ids){
             string user = Globals.get_user(Request);
@@ -123,6 +169,67 @@ namespace Diplomski.Controllers
             }
             if(machines == null){
                 return BadRequest("Error finding machines");
+            }
+            machines.OrderBy(x=>x.roomId);
+
+            string filename = Globals.write_inventory(machines);
+            ses.set_inventory(filename, machines);
+            return Ok(filename);
+        }
+        [Authorize]
+        [HttpPut("room_inventory")]
+        public IActionResult add_to_room_inventory(string session, List<int> ids){
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            List<Machine>? machines = new List<Machine>();
+            foreach(int id in ids){
+                List<Machine>? mac = DB.ListMachines(id);
+                if (mac == null) {
+                    continue;
+                }   
+                machines.AddRange(mac);
+            }
+            if(machines == null){
+                return BadRequest("Error finding machines");
+            }
+            if(machines.Count != ids.Count){
+                return BadRequest("Not all machines found");
+            }
+            machines.AddRange(ses.get_machines());
+            machines.OrderBy(x=>x.roomId);
+
+            string filename = Globals.write_inventory(machines);
+            ses.set_inventory(filename, machines);
+            return Ok(filename);
+        }
+        [Authorize]
+        [HttpDelete("room_inventory")]
+        public IActionResult remove_from_room_inventory(string session, List<int> ids){
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            List<Machine> machines = ses.get_machines();
+  
+            if(machines.Count != ids.Count){
+                return BadRequest("No more machines");
+            }
+            List<Machine>? delete_machines = new List<Machine>();
+            foreach(int id in ids){
+                List<Machine>? mac = DB.ListMachines(id);
+                if (mac == null) {
+                    continue;
+                }   
+                delete_machines.AddRange(mac);
+            }
+            foreach(Machine machine in delete_machines) {
+                machines.RemoveAll(x=>x.id == machine.id);
             }
             machines.OrderBy(x=>x.roomId);
 

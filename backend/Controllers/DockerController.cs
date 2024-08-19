@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 namespace Diplomski.Controllers
 {
+    [NonController]
     [ApiController]
     [Route("[controller]")]
     public class DockerController : Controller

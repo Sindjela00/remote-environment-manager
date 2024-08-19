@@ -5,6 +5,7 @@ using System.Diagnostics;
 
 namespace Diplomski.Controllers
 {
+    [NonController] // Disabled
     [ApiController]
     [Route("[controller]")]
     public class WslController : Controller

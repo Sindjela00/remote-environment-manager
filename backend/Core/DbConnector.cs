@@ -319,5 +319,29 @@ public class DB
             return -1;
         }
     }
+    public static int userid_by_email(string email) {
+        using (var connection = new MySqlConnection(connStr))
+        {
+            try
+            {
+                connection.Open();
+                string sql = "SELECT * FROM users WHERE email = @email";
+
+                MySqlCommand command = new MySqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@email", email);
+
+                var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return reader.GetInt32("id");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return -1;
+        }
+    }
 }
 

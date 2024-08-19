@@ -5,6 +5,7 @@ using System.IO.Compression;
 
 namespace Diplomski.Controllers
 {
+    [NonController]
     [ApiController]
     [Route("[controller]")]
    public class JobController : Controller
