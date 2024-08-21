@@ -14,6 +14,6 @@
     - name: Fetch radovi
       fetch:
         src: "{{ item.path }}"
-        dest: "{{ playbook_dir }}/../files/pull/{{ ansible_facts['hostname'] }}/"
+        dest: "{{ playbook_dir }}/../files/{{ randomdir }}/{{ ansible_facts['hostname'] }}/"
         flat: yes
       with_items: "{{ files_to_copy.files }}"

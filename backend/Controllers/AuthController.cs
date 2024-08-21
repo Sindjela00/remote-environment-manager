@@ -60,7 +60,7 @@ namespace Diplomski.Controllers
         }
         [Authorize]
         [HttpDelete("session")]
-        public IActionResult remove_session(string session, string email)
+        public IActionResult remove_session(string session)
         {
             string user = Globals.get_user(Request);
             Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.owner(user));

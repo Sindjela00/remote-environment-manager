@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.IdentityModel.Tokens;
 
 public class Session
 {
@@ -7,6 +8,7 @@ public class Session
     private List<string> user_ids;
     private ProcessHandler handler;
     private string foldername;
+    private string pulled_foldername;
     private string inventory;
     private List<Machine> machines;
     private List<KeyValuePair<string, string>> subset_inventories;
@@ -18,6 +20,7 @@ public class Session
         handler = new ProcessHandler();
         subset_inventories = new List<KeyValuePair<string, string>>();
         foldername = "";
+        pulled_foldername = "";
         inventory = "";
     }
     public bool belong(string user_id){
@@ -70,9 +73,31 @@ public class Session
         return handler.parse_processes();
     }
     public void set_directory(string dir) {
+        if (!foldername.IsNullOrEmpty()) {
+            try{
+                Directory.Delete($@"Resource/files/{foldername}", true);
+            }
+            catch (Exception ex) {
+                Console.Write(ex.Message);
+            }
+        }
         foldername = dir;
     }
     public string get_directory() {
         return foldername;
+    }
+    public void set_pull_directory(string dir) {
+        if (!pulled_foldername.IsNullOrEmpty()) {
+            try{
+                Directory.Delete($@"Resource/files/{foldername}", true);
+            }
+            catch (Exception ex) {
+                Console.Write(ex.Message);
+            }
+        }
+        pulled_foldername = dir;
+    }
+    public string get_pull_directory() {
+        return pulled_foldername;
     }
 }

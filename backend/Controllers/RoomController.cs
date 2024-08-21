@@ -114,6 +114,28 @@ namespace Diplomski.Controllers
             ses.set_inventory(filename, machines);
             return Ok(filename);
         }
+        [Authorize]
+        [HttpPost("inventory_subset")]
+        public IActionResult generate_inventory_subset(string session, string name, List<int> ids){
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            List<Machine>? machines = DB.ListMachines(ids);
+            if(machines == null){
+                return BadRequest("Error finding machines");
+            }
+            if(machines.Count != ids.Count){
+                return BadRequest("Not all machines found");
+            }
+            machines.OrderBy(x=>x.roomId);
+
+            string filename = Globals.write_inventory(machines);
+            ses.add_subset_inventory(name, filename);
+            return Ok(name);
+        }
 
         [Authorize]
         [HttpPut("inventory")]
@@ -187,6 +209,32 @@ namespace Diplomski.Controllers
 
             string filename = Globals.write_inventory(machines);
             ses.set_inventory(filename, machines);
+            return Ok(filename);
+        }
+        [Authorize]
+        [HttpPost("room_inventory_subset")]
+        public IActionResult generate_room_inventory_subset(string session,string name, List<int> ids){
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            List<Machine>? machines = new List<Machine>();
+            foreach(int id in ids){
+                List<Machine>? mac = DB.ListMachines(id);
+                if (mac == null) {
+                    continue;
+                }   
+                machines.AddRange(mac);
+            }
+            if(machines == null){
+                return BadRequest("Error finding machines");
+            }
+            machines.OrderBy(x=>x.roomId);
+
+            string filename = Globals.write_inventory(machines);
+            ses.add_subset_inventory(name, filename);
             return Ok(filename);
         }
 

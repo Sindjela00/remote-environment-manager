@@ -6,6 +6,7 @@ using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Ocsp;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO.Compression;
 using System.Security.Claims;
 
 namespace Diplomski.Controllers
@@ -114,6 +115,7 @@ namespace Diplomski.Controllers
             return BadRequest();
         }
 
+        [Authorize]
         [HttpPost("/pull_files")]
         public IActionResult pull_files(string session, string? inventory, List<int>? machines)
         {
@@ -130,7 +132,28 @@ namespace Diplomski.Controllers
             return BadRequest();
         }
 
+        [HttpGet("/download_files")]
+        public IActionResult Pull(string session, string? inventory, List<int>? machines)
+        {
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            string inv = Globals.choose_inventory( ses!, inventory, machines);
+            
+            string materijali_path = @"Resource\files\" +ses.get_pull_directory();
+            string zip_path = @"Resource\files\zip\" + Path.GetRandomFileName() + ".zip";
+            ZipFile.CreateFromDirectory(materijali_path, zip_path);
+            Stream stream = new FileStream(zip_path, FileMode.Open);
+            if(stream == null) {
+                return NotFound();
+            }
+            return File(stream, "application/octet-stream", "rezultati.zip");
+        }
 
+        [Authorize]
         [HttpGet("/process_status")]
         public IActionResult process_status(string session)
         {
@@ -150,6 +173,7 @@ namespace Diplomski.Controllers
                     continue;
                 }
                 string stdout = dynobj.stdout;
+                Console.WriteLine(stdout);
                 List<string> filteredList = new List<string>();
                 if (stdout.Length > 0)
                 {

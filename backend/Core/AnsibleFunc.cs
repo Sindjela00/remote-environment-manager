@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 static class Ansible {
     public static bool pull_files_func(Session session, string inventory)
         {
+            string dirname = Path.GetRandomFileName();
+            session.set_pull_directory(dirname);
             var processInfo = new ProcessStartInfo("bash",
-                $"-c \"ansible-playbook -i Resource/inventory/{inventory} Resource/playbooks/pull_files.yml\"");
+                $"-c \"ansible-playbook -i Resource/inventory/{inventory} --extra-vars \'randomdir={dirname}\' Resource/playbooks/pull_files.yml\"");
             processInfo.CreateNoWindow = true;
             processInfo.UseShellExecute = false;
             processInfo.RedirectStandardOutput = true;
