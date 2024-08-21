@@ -5,7 +5,8 @@ public class Session
     private string id;
     private string owner_id;
     private List<string> user_ids;
-    private Processes handler;
+    private ProcessHandler handler;
+    private string foldername;
     private string inventory;
     private List<Machine> machines;
     private List<KeyValuePair<string, string>> subset_inventories;
@@ -14,8 +15,10 @@ public class Session
         this.id = id;
         owner_id = user_id;
         user_ids = new List<string>();
-        handler = new Processes();
+        handler = new ProcessHandler();
         subset_inventories = new List<KeyValuePair<string, string>>();
+        foldername = "";
+        inventory = "";
     }
     public bool belong(string user_id){
         if (owner_id == user_id || user_ids.Contains(user_id)) {
@@ -65,5 +68,11 @@ public class Session
     }
     public dynamic jobs_result(){
         return handler.parse_processes();
+    }
+    public void set_directory(string dir) {
+        foldername = dir;
+    }
+    public string get_directory() {
+        return foldername;
     }
 }

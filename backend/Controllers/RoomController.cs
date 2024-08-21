@@ -11,6 +11,7 @@ namespace Diplomski.Controllers
     [Route("[controller]")]
     public class RoomController : Controller
     {
+        [Authorize]
         [HttpGet]
         public IActionResult get_rooms()
         {
@@ -22,6 +23,7 @@ namespace Diplomski.Controllers
             return Ok(rooms);
         }
 
+        [Authorize]
         [HttpPost]
         public IActionResult add_room(string room)
         {
@@ -36,6 +38,8 @@ namespace Diplomski.Controllers
             }
             return BadRequest("Error entrying new room!");
         }
+
+        [Authorize]
         [HttpPut]
         public IActionResult rename_room(uint id, string room)
         {
@@ -51,6 +55,7 @@ namespace Diplomski.Controllers
             return BadRequest("Error renaming room!");
         }
 
+        [Authorize]
         [HttpGet("machines")]
         public IActionResult list_machines(){
             List<Machine>? machines = DB.ListMachines();
@@ -60,6 +65,7 @@ namespace Diplomski.Controllers
             return Ok(machines);
         }
 
+        [Authorize]
         [HttpGet("machines/{id}")]
         public IActionResult list_machines(int id){
             List<Machine>? machines = DB.ListMachines(id);
@@ -68,6 +74,7 @@ namespace Diplomski.Controllers
             }
             return Ok(machines);
         }
+        [Authorize]
         [HttpPost("machines")]
         public IActionResult add_machine(Machine machine){
             if(DB.AddMachines(machine)){
@@ -75,6 +82,8 @@ namespace Diplomski.Controllers
             }
             return BadRequest("Error adding machine");
         }
+
+        [Authorize]
         [HttpPut("machines/{id}")]
         public IActionResult edit_machine(int id, Machine machine){
             if(DB.EditMachines(id, machine)){
@@ -82,6 +91,7 @@ namespace Diplomski.Controllers
             }
             return BadRequest("Error adding machine");
         }
+
         [Authorize]
         [HttpPost("inventory")]
         public IActionResult generate_inventory(string session, List<int> ids){
@@ -104,6 +114,7 @@ namespace Diplomski.Controllers
             ses.set_inventory(filename, machines);
             return Ok(filename);
         }
+
         [Authorize]
         [HttpPut("inventory")]
         public IActionResult addto_inventory(string session, List<int> ids){
@@ -127,6 +138,7 @@ namespace Diplomski.Controllers
             ses.set_inventory(filename, machines);
             return Ok(filename);
         }
+
         [Authorize]
         [HttpDelete("inventory")]
         public IActionResult removefrom_inventory(string session, List<int> ids){
@@ -150,6 +162,7 @@ namespace Diplomski.Controllers
             ses.set_inventory(filename, machines);
             return Ok(filename);
         }
+
         [Authorize]
         [HttpPost("room_inventory")]
         public IActionResult generate_room_inventory(string session, List<int> ids){
@@ -176,6 +189,7 @@ namespace Diplomski.Controllers
             ses.set_inventory(filename, machines);
             return Ok(filename);
         }
+
         [Authorize]
         [HttpPut("room_inventory")]
         public IActionResult add_to_room_inventory(string session, List<int> ids){
@@ -206,6 +220,7 @@ namespace Diplomski.Controllers
             ses.set_inventory(filename, machines);
             return Ok(filename);
         }
+        
         [Authorize]
         [HttpDelete("room_inventory")]
         public IActionResult remove_from_room_inventory(string session, List<int> ids){

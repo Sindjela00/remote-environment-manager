@@ -74,6 +74,27 @@ static class Ansible {
             return false;
             //return BadRequest($"Error starting build {process.StandardError.ReadToEnd()}");
         }
+
+        public static bool stop_container_func(Session session, string predmet, string inventory)
+        {
+            ProcessStartInfo processInfo = new ProcessStartInfo("bash",
+                $"-c \"ansible-playbook -i Resource/inventory/{inventory} --extra-vars \'name={predmet}\' Resource/playbooks/stop_container.yml \"");
+            processInfo.CreateNoWindow = true;
+            processInfo.UseShellExecute = false;
+            processInfo.RedirectStandardOutput = true;
+            processInfo.RedirectStandardError = true;
+
+            Process? process = new Process();
+
+            process.StartInfo = processInfo;
+            if (process.Start())
+            {
+                session.addProcess(process);
+                return true;
+            }
+            return false;
+            //return BadRequest($"Error starting build {process.StandardError.ReadToEnd()}");
+        }
         public static bool push_files_func(Session session, string directory, string inventory)
         {
             var processInfo = new ProcessStartInfo("bash",

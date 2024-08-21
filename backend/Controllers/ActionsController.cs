@@ -12,10 +12,10 @@ namespace Diplomski.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class NewAnsibleController : Controller
+    public class ActionsController : Controller
     {
         [Authorize]
-        [HttpPost("/build1")]
+        [HttpPost("/build_image")]
         public IActionResult build_image(string session, string predmet, string image, string? inventory, List<int>? machines)
         {
             string user = Globals.get_user(Request);
@@ -31,8 +31,8 @@ namespace Diplomski.Controllers
             return BadRequest();
         }
 
-        
-        [HttpPost("/start1")]
+        [Authorize]
+        [HttpPost("/start_container")]
         public IActionResult start_image(string session, string predmet, string image, string? inventory, List<int>? machines)
         {
             string user = Globals.get_user(Request);
@@ -48,9 +48,91 @@ namespace Diplomski.Controllers
             return BadRequest();
         }
 
+        [Authorize]
+        [HttpPost("/stop_container")]
+        public IActionResult stop_container(string session, string predmet, string? inventory, List<int>? machines)
+        {
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            string inv = Globals.choose_inventory( ses!, inventory, machines);
+             if (Ansible.stop_container_func(ses, predmet, inv)) {
+                return Ok();
+            }
+            return BadRequest();
+        }
 
-        [HttpGet("/ansibele_process")]
-        public IActionResult ansible_process_status(string session)
+        [Authorize]
+        [HttpPost("/upload_files")]
+        public IActionResult upload_files(string session, List<IFormFile> files)
+        {
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            long size = files.Sum(f => f.Length);
+            string foldername = Path.GetRandomFileName();
+            var filePath = "./Resource/files/" + foldername;
+            Directory.CreateDirectory(filePath);
+            filePath += "/";
+            foreach(var formFile in files)
+            {
+                if(formFile.Length > 0)
+                {
+                    using(var stream = System.IO.File.Create( filePath + formFile.FileName))
+                    {
+                        formFile.CopyTo(stream);
+                    }
+                }
+            }
+            ses.set_directory(foldername);
+            return Ok(new { count = files.Count, size, foldername});
+        }
+        
+        [Authorize]
+        [HttpPost("/push_files")]
+        public IActionResult push_files(string session, string? directory, string? inventory, List<int>? machines)
+        {
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            string inv = Globals.choose_inventory( ses!, inventory, machines);
+            if (directory == null) {
+                directory = ses.get_directory();
+            }
+            if (Ansible.push_files_func(ses, directory,inv)) {
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+        [HttpPost("/pull_files")]
+        public IActionResult pull_files(string session, string? inventory, List<int>? machines)
+        {
+            string user = Globals.get_user(Request);
+            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
+            if (ses == null)
+            {
+                return BadRequest("You dont have permission for that session!");
+            }
+            string inv = Globals.choose_inventory( ses!, inventory, machines);
+            if (Ansible.pull_files_func(ses, inv)) {
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+
+        [HttpGet("/process_status")]
+        public IActionResult process_status(string session)
         {
             string user = Globals.get_user(Request);
             Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
@@ -115,40 +197,5 @@ namespace Diplomski.Controllers
             }
             return Ok(output);
         }
-        
-        [HttpPost("/push_files1")]
-        public IActionResult push_files(string session, string directory, string? inventory, List<int>? machines)
-        {
-            string user = Globals.get_user(Request);
-            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
-            if (ses == null)
-            {
-                return BadRequest("You dont have permission for that session!");
-            }
-            string inv = Globals.choose_inventory( ses!, inventory, machines);
-            if (Ansible.push_files_func(ses, directory,inv)) {
-                return Ok();
-            }
-            return BadRequest();
-        }
-
-        [HttpPost("/pull_files1")]
-        public IActionResult pull_files(string session, string? inventory, List<int>? machines)
-        {
-            string user = Globals.get_user(Request);
-            Session? ses = Globals.sessions.Find(x => x.get_id() == session && x.belong(user));
-            if (ses == null)
-            {
-                return BadRequest("You dont have permission for that session!");
-            }
-            string inv = Globals.choose_inventory( ses!, inventory, machines);
-            if (Ansible.pull_files_func(ses, inv)) {
-                return Ok();
-            }
-            return BadRequest();
-        }
-        
-        
-
     }
 }

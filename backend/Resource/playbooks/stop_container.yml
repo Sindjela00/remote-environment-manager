@@ -1,0 +1,11 @@
+---
+
+- name: Stop and Delete Docker container
+  hosts: all
+  become: yes
+  tasks:
+    - name: Stop container with a command
+      shell: docker stop {{ name }}
+
+    - name: Delete container with a command
+      shell: docker rm {{ name }}
