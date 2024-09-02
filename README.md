@@ -53,6 +53,7 @@ DELETE /Auth/session?session={session_name}<br>
 <b>NOTE:</b> Status of any step from 6-10 can be seen on<br>
 GET /status?session={session_name}<br>
 ![plot](./UseCaseDiagram.png)
+![plot](./sequence_diagram.png)
 ## Examples of classes that can benefit containerization
 <ul>
 <li>Logičko i funkcijsko programiranje - preinstalled Haskell and Scala</li>
